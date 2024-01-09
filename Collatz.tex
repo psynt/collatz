@@ -1,0 +1,195 @@
+\documentclass[10pt,a4paper,showpacs,nofootinbib,aps,superscriptaddress,eqsecnum,prd,showkeys,twocolumn,notitlepage]{article}
+\usepackage[latin1]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{dcolumn}
+\usepackage{hyperref}
+\usepackage{fmtcount}
+\author{Nichita Trita}
+\title{On the Collatz Conjecture}
+\begin{document}
+
+\begin{abstract}
+The Collatz conjecture will kill us all!!!
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+
+The Collatz conjecture gives us the function 
+\[f : \mathbb{N}^{*} \rightarrow \mathbb{N}^{*}, f(x) = 
+\begin{cases}
+	x / 2 & x\equiv 0 \pmod 2\\
+	3x + 1 & x\equiv 1 \pmod 2
+\end{cases}\] and states that repeatedly applying it on any positive integer will eventually result in 1. Whether that is true or not has remained unknown for many years.
+
+\section{Approach}
+
+If the Collatz function does indeed destroy all numbers, then there must be something about the function itself, rather than a property of the numbers that are being consumed by it. Something powerful enough to make it a cancer capable of killing \textit{any} number.     
+We suspect that the fact that the original function as written both lengthens and shortens numbers depending on parity hides what the funcion is truly doing to those poor souls. As such, we would start by rewriting the function as 
+\[f_{n} : \mathbb{N} \rightarrow \mathbb{N}, 
+f_{n}(x) = 
+\begin{cases}
+0 & x \in \{0, 1, 2^n\} \\
+f_{n+1}(x) & x \equiv 0 \pmod {2^n} \\
+3x + 2^n & otherwise
+\end{cases}
+\] with $n \in \mathbb{N}$, and 
+\[ c : \mathbb{N} \rightarrow \mathbb{N}, c(x) = f_0(x)
+\]. Now we must figure out whether or not there exists any number that will be able to resist becoming a $0$.
+In computer science, we often find base 10 to be an inconvenient way to represent numbers. As such, all numbers from this point onward will be base 4 unless otherwise specified.
+
+\section{The Fun Stuff}
+
+We can start by taking a closer look at what happens to the individual components of numbers when they go through the Collatz machine: digits.
+
+$0 \rightarrow 0$
+
+$1 \rightarrow 10$
+
+$2 \rightarrow 20$
+
+$3 \rightarrow 22$
+
+We notice that the maximum carry we can have is $2$. As such, let us precompute the $n$, $3n$, $3n+1$ and $3n+2$ values for each of the digits:
+
+\begin{center}
+\begin{tabular}{||c c c c||}
+\hline
+$n$ & $3n$ & $3n + 1$ & $3n + 2$ \\ [0.5ex]
+\hline
+\hline
+$0$ & $0$ & $1$ & $2$\\
+\hline
+$1$ & $3$ & $10$ & $11$\\
+\hline
+$2$ & $12$ & $13$ & $20$\\
+\hline
+$3$ & $21$ & $22$ & $23$\\
+\hline
+\end{tabular}
+\end{center}
+
+The state a number will have to have before it becomes $0$ will be either a $1$ or a $2$ followed by 0 or more $0$s:
+
+$1 \rightarrow 0$ 
+
+$2 \rightarrow 0$
+
+$1000 \rightarrow 0$
+
+$2000 \rightarrow 0$
+
+Next let us take a closer look at the full lifecycle of single digits in this number mincer:   
+
+$0 \rightarrow 0$, the same as above 
+
+$1 \rightarrow 10 \rightarrow 0$
+
+$2 \rightarrow 20 \rightarrow 0$
+
+$3 \rightarrow 22 \rightarrow 200 \rightarrow 0$.
+
+Based on this, we can conclude that no matter what the digit we put thorough it, the Collatz mincer will shred it like paper.
+
+Now let us have a look at what happens to two-digit numbers:
+
+$01 \rightarrow 10$
+
+$11 \rightarrow 100$
+
+$21 \rightarrow 130 \rightarrow 1120 \rightarrow 10100 \rightarrow 31000 \rightarrow 220000 \rightarrow 1000000$
+
+$31 \rightarrow 220 \rightarrow 2000$
+
+$02 \rightarrow 20$
+
+$12 \rightarrow 110 \rightarrow 1000$
+
+$22 \rightarrow 200$
+
+$32 \rightarrow 230 \rightarrow 2020 \rightarrow 2200 \rightarrow 20000$
+
+$03 \rightarrow 22 \rightarrow 200$
+
+$13 \rightarrow 112 \rightarrow 1010 \rightarrow 3100 \rightarrow 22000 \rightarrow 100000$
+
+$23 \rightarrow 202 \rightarrow 220 \rightarrow 2000$
+
+$33 \rightarrow 232 \rightarrow 2030 \rightarrow 122220 \rightarrow 110000 \rightarrow 1000000$
+
+We have demonstrated that it is not possible to construct the ending of a number that will not terminate.
+
+Notably, $31 \rightarrow 220 \rightarrow 1000$, as well as $30 \rightarrow 220 \rightarrow 1000$.  Also, $20 \rightarrow 200$ as well as $22 \rightarrow 200$.
+
+\addtocounter{section}{6}
+
+\section{Induction}
+
+We will denote numbers of arbitrary length using the $e$-notation. Note that this still refers to base 10, and not base 22.
+
+$P(k)$ A number of length k will terminate.
+
+Numbers of length 1 and of length 2 terminate as demonstrated above.
+
+Next, if numbers of length $k$ terminate, we check whether numbers of length $k+2$ will also terminate.
+
+After terminating $k$ digits, if we were left with $1e(k-1)$, then a number of length $k+2$ could have one of the forms:
+
+$101e(k-1) \rightarrow 31e(k) \rightarrow 22e(k+1) \rightarrow 2e(k+3)$
+
+$201e(k-1) \rightarrow 121e(k) \rightarrow 103e(k+1) \rightarrow 322e(k+1) \rightarrow 23e(k+3) \rightarrow [...] \rightarrow 2e(k+12)$
+
+$301e(k-1) \rightarrow 211e(k) \rightarrow 13e(k+2) \rightarrow 112e(k+2) \rightarrow 101e(k+3) \rightarrow 31e(k+10) \rightarrow [...] \rightarrow 2e(k+13)$
+
+$111e(k-1) \rightarrow 1e(k+2)$
+
+$211e(k-1) \rightarrow 13e(k+1) \rightarrow [...] \rightarrow 1e(k+12)$
+
+$311e(k-1) \rightarrow 22e(k+1) \rightarrow [...] \rightarrow 2e(k+3)$
+
+$121e(k-1) \rightarrow 103e(k) \rightarrow [...] \rightarrow 2e(k+11)$
+
+$221e(k-1) \rightarrow 1331e(k) \rightarrow 1132e(k+1) \rightarrow 1013e(k+2) \rightarrow 3112e(k+2) \rightarrow 2201e(k+3) \rightarrow 1321e(k+10) \rightarrow 1123e(k+11) \rightarrow 10102e(k+11) \rightarrow 3032e(k+12) \rightarrow 2123e(k+13) \rightarrow 13102e(k+13) \rightarrow 11132e(k+20) \rightarrow 10013e(k+21) \rightarrow 30112e(k+21) \rightarrow 21101e(k+22) \rightarrow 12331e(k+23) \rightarrow 11032e(k+30) \rightarrow 3323e(k+31) \rightarrow 23302e(k+31) \rightarrow 20312e(k+32) \rightarrow 12221e(k+33) \rightarrow 10333e(k+100) \rightarrow 32332e(k+100) \rightarrow 21033e(k+101) \rightarrow 123232e(k+102) \rightarrow 110202e(k+103) \rightarrow 33132e(k+110) \rightarrow 23212e(k+111) \rightarrow 20231e(k+112) \rightarrow 12202e(k+113) \rightarrow 1322e(k+120) \rightarrow 113e(k+122) \rightarrow 1012e(k+122) \rightarrow 311e(k+123) \rightarrow 22e(k+131) \rightarrow 2e(k+133)$
+
+$321e(k-1) \rightarrow 223e(k) \rightarrow 2002e(k) \rightarrow 1302e(k+1) \rightarrow 1112e(k+2) \rightarrow 1001e(k+3) \rightarrow 301e(k+10) \rightarrow [...] \rightarrow 2e(k+30)$
+
+$131e(k-1) \rightarrow 112e(k) \rightarrow 101e(k+1) \rightarrow 31e(k+2) \rightarrow [...] \rightarrow 2e(k+11) $
+
+$231e(k-1) \rightarrow 202e(k) \rightarrow 132e(k+1) \rightarrow 112e(k+2) \rightarrow 101e(k+3) \rightarrow 31e(k+10) \rightarrow [...] \rightarrow 2e(k+13)$
+
+$331e(k-1) \rightarrow 232e(k) \rightarrow 203e(k+1) \rightarrow 1222e(k+1) \rightarrow 11e(k+10) \rightarrow 1e(k+12)$
+
+Alternatively, if $2e(k-1)$, then a number of length $k+2$ would have one of the following forms:
+
+$102e(k-1) \rightarrow 12e(k) \rightarrow 11e(k+1) \rightarrow 1e(k+3)$
+
+$202e(k-1) \rightarrow 122e(k) \rightarrow 11e(k+2) \rightarrow 1e(k+10)$
+
+$302e(k-1) \rightarrow 212e(k) \rightarrow 131e(k+1) \rightarrow 112e(k+2) \rightarrow [...] \rightarrow 2e(k+13)$
+
+$112e(k-1) \rightarrow [...] \rightarrow 2e(k+10)$
+
+$212e(k-1) \rightarrow 131e(k) \rightarrow [...] \rightarrow 2e(k+12)$
+
+$312e(k-1) \rightarrow 221e(k) \rightarrow [...] \rightarrow 2e(k+200)$
+
+$122e(k-1) \rightarrow 11e(k+1) \rightarrow 1e(k+3)$
+
+$222e(k-1) \rightarrow 2e(k+2)$
+
+$322e(k-1) \rightarrow 23e(k+1) \rightarrow [...] \rightarrow 2e(k+10)$
+
+$132e(k-1) \rightarrow 112e(k) \rightarrow [...] \rightarrow 2e(k+11)$
+
+$232e(k-1) \rightarrow 203e(k) \rightarrow 1222e(k) \rightarrow 11e(k+3) \rightarrow 1e(k+11)$
+
+$332e(k-1) \rightarrow 233e(k) \rightarrow 2032e(k) \rightarrow 1323e(k+1) \rightarrow 11302e(k+1) \rightarrow 10112e(k+2) \rightarrow 3101e(k+3) \rightarrow 2131e(k+10) \rightarrow 1312e(k+11) \rightarrow 1121e(k+12) \rightarrow 1003e(k+13) \rightarrow 3022e(k+13) \rightarrow 212e(k+21) \rightarrow 131e(k+22) \rightarrow 112e(k+23) \rightarrow 101e(k+30) \rightarrow 31e(k+31) \rightarrow [...] \rightarrow 2e(k+100)$
+
+All of which terminate. It is therefore impossible to construct a number of any length that is not defeatable by the Collatz conjecture.
+
+
+\end{document}
